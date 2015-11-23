@@ -17,7 +17,7 @@ Function Log
 		[Parameter(Mandatory=$true)] [string]$message
 	)
 	
-	$logFilePath = "c:\cfn\logs\$logFile"
+	$logFilePath = "logs\$logFile"
 	
 	If(! (Test-Path -Path "$logFilePath") )
 	{
