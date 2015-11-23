@@ -1,0 +1,84 @@
+<#
+.SYNOPSIS
+Create user in Active Directory
+
+#>
+
+Import-Module ActiveDirectory
+Import-Module helpers.psm1
+$logFile="logs\SetupUser.log"
+
+$timeout=30
+
+$DomainControllerFQDN = ""
+
+foreach($User in $Users) {
+
+	# Attributes
+	$Username = $User.Username
+	$DisplayName = $User.DisplayName
+	$UserPrincipalName = $User.UserPrincipalName
+	$GivenName = $User.GivenName
+	$Surname = $User.Surname
+	$Description = $User.Description
+	$Department = $User.Department
+	$Path = $User.Path
+	$Password = $User.Password
+	$SecurePassword = $Password | ConvertTo-SecureString -AsPlainText -Force
+	$ChangePasswordAtLogon = $True
+	$PasswordNeverExpires = $False
+	$Administrator = $User.Administrator
+
+	$userNotCreated=$True
+	While($userNotCreated) {
+		If (Test-Online -computerName $DomainControllerFQDN) {
+			# Find a user, if it exists
+			$ExistingUser = Get-ADUser -LDAPFilter "(sAMAccountName=$Username)"
+			
+			# If the user does not exist, create it
+			If ($ExistingUser -eq $Null) 
+			{	
+				Log -logFile $logFile -message "$Username does not exist. Creating..."
+
+				New-ADUser -Name $DisplayName -UserPrincipalName $UserPrincipalName -SamAccountName $Username -GivenName $GivenName -DisplayName `
+				$DisplayName -SurName $Surname -Description $Description -Department $Department -Path $Path -AccountPassword $SecurePassword `
+				-Enabled $True -PasswordNeverExpires $PasswordNeverExpires -ChangePasswordAtLogon $ChangePasswordAtLogon
+				
+				If($Administrator -eq "TRUE")
+				{ Add-ADGroupMember -Identity "Domain Admins" -Member $Username }
+			}
+			# Else, the user already exists, so update any relevant information
+			Else
+			{
+				Log -logFile $logFile -message "$Username already exists."
+				$UserToUpdate = Get-ADUser -Identity $Username
+				$ExistingUserDescription = $UserToUpdate.$Description
+				
+				# If description is not provided or has changed
+				If ($Description -eq $Null -Or
+					$ExistingUserDescription -ne $Description)
+				{
+					Log -logFile $logFile -message "Changing description for $Username..."
+					$UserToUpdate.Description = $Description
+					Set-ADUser -Instance $UserToUpdate
+					If($Administrator -eq "TRUE")
+					{ Add-ADGroupMember -Identity "Domain Admins" -Member $Username }
+				}
+				# Else, skip it
+				Else
+				{
+					Log -logFile $logFile -message "Description has not changed for $Username."
+				}
+			}
+			# Add a blank line to separate users
+			Log -logFile $logFile -message " "
+			$userNotCreated=$False
+		}
+		Else
+		{
+			# In case the domain controller is not ready, give it some time
+			Log -logFile $logFile -message "Waiting $timeout seconds for the domain controller to come online to add $DisplayName..."
+			Start-Sleep -s $timeout
+		}
+	}
+}
