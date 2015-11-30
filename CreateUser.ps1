@@ -6,7 +6,7 @@ Create user in Active Directory
 
 Import-Module ActiveDirectory
 Import-Module helpers.psm1
-$logFile="logs\SetupUser.log"
+$logFile="logs\CreateUser.log"
 
 $timeout=30
 
