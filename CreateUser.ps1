@@ -1,6 +1,7 @@
 <#
 .SYNOPSIS
 Create user in Active Directory
+Create mailbox for the user
 
 #>
 
@@ -22,6 +23,7 @@ foreach($User in $Users) {
 	$Surname = $User.Surname
 	$Description = $User.Description
 	$Title = $User.Title
+	$PrimarySMTPAddress = $User.PrimarySMTPAddress
 	$Department = $User.Department
 	$Path = $User.Path
 	$Password = $User.Password
@@ -43,6 +45,13 @@ foreach($User in $Users) {
 				New-ADUser -Name $DisplayName -UserPrincipalName $UserPrincipalName -SamAccountName $Username -GivenName $GivenName -DisplayName `
 				$DisplayName -SurName $Surname -Description $Description —Title $Title -Department $Department -Path $Path -AccountPassword $SecurePassword `
 				-Enabled $True -PasswordNeverExpires $PasswordNeverExpires -ChangePasswordAtLogon $ChangePasswordAtLogon
+
+				Log -logFile $logFile -message “Creating mailbox for $Username..”
+				Enable-Mailbox -Identity $UserPrincipalName
+
+				Log -logFile $logFile -message “Setting SMTP addresses..”
+				Set-Mailbox -Identity $UserPrincipalName -EmailAddresses @{Remove=“SMTP:$UserPrincipalName”,Add=“smtp:$UserPrincipalName”,Add=“SMTP=$PrimarySMTPAddress”}
+				
 			}
 			# Else, the user already exists, so update any relevant information
 			Else
