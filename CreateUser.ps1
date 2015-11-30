@@ -21,6 +21,7 @@ foreach($User in $Users) {
 	$GivenName = $User.GivenName
 	$Surname = $User.Surname
 	$Description = $User.Description
+	$Title = $User.Title
 	$Department = $User.Department
 	$Path = $User.Path
 	$Password = $User.Password
@@ -40,7 +41,7 @@ foreach($User in $Users) {
 				Log -logFile $logFile -message "$Username does not exist. Creating..."
 
 				New-ADUser -Name $DisplayName -UserPrincipalName $UserPrincipalName -SamAccountName $Username -GivenName $GivenName -DisplayName `
-				$DisplayName -SurName $Surname -Description $Description -Department $Department -Path $Path -AccountPassword $SecurePassword `
+				$DisplayName -SurName $Surname -Description $Description —Title $Title -Department $Department -Path $Path -AccountPassword $SecurePassword `
 				-Enabled $True -PasswordNeverExpires $PasswordNeverExpires -ChangePasswordAtLogon $ChangePasswordAtLogon
 			}
 			# Else, the user already exists, so update any relevant information
