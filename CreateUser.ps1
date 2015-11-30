@@ -6,6 +6,7 @@ Create mailbox for the user
 #>
 
 Import-Module ActiveDirectory
+Import-Module DirSync
 Import-Module helpers.psm1
 $logFile="logs\CreateUser.log"
 
@@ -64,6 +65,9 @@ foreach($User in $Users) {
 				$LyncServer = Read-Host “Enter the FQDN of the Lync server:”
 				$LyncCredential = Get-Credential
     				$CSSession = New-PSSession -ConnectionUri https://$LyncServer/ocspowershell -Credential $LyncCredential
+
+				Log -logFile $logFile -message “Enabling Lync for $Username..”
+				Enable-CsUser -Identity $UserPrincipalName -RegistrarPool “$LyncServer” -SipAddressType SamAccountName  -SipDomain landair.com
 				
 			}
 			# Else, the user already exists, so update any relevant information
