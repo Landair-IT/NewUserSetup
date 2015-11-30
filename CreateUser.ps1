@@ -27,7 +27,6 @@ foreach($User in $Users) {
 	$SecurePassword = $Password | ConvertTo-SecureString -AsPlainText -Force
 	$ChangePasswordAtLogon = $True
 	$PasswordNeverExpires = $False
-	$Administrator = $User.Administrator
 
 	$userNotCreated=$True
 	While($userNotCreated) {
@@ -43,9 +42,6 @@ foreach($User in $Users) {
 				New-ADUser -Name $DisplayName -UserPrincipalName $UserPrincipalName -SamAccountName $Username -GivenName $GivenName -DisplayName `
 				$DisplayName -SurName $Surname -Description $Description -Department $Department -Path $Path -AccountPassword $SecurePassword `
 				-Enabled $True -PasswordNeverExpires $PasswordNeverExpires -ChangePasswordAtLogon $ChangePasswordAtLogon
-				
-				If($Administrator -eq "TRUE")
-				{ Add-ADGroupMember -Identity "Domain Admins" -Member $Username }
 			}
 			# Else, the user already exists, so update any relevant information
 			Else
