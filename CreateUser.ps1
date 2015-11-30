@@ -51,7 +51,7 @@ foreach($User in $Users) {
 				Enable-Mailbox -Identity $UserPrincipalName
 
 				Log -logFile $logFile -message "Setting SMTP addresses.."
-				Set-Mailbox -Identity $UserPrincipalName -EmailAddresses @{Remove=“SMTP:$UserPrincipalName”,Add=“smtp:$UserPrincipalName”,Add=“SMTP=$PrimarySMTPAddress”}
+				Set-Mailbox -Identity $UserPrincipalName -EmailAddresses @{Remove="SMTP:$UserPrincipalName",Add="smtp:$UserPrincipalName",Add="SMTP=$PrimarySMTPAddress"}
 
 				Log -logFile $logFile -message "Syncing Active Directory to Office 365.."
 				Start-OnlineCoexistenceSync -FullSync
@@ -63,7 +63,7 @@ foreach($User in $Users) {
 
 				Log -logFile $logFile -message "Migrating mailbox to Office 365.."
 				$OnPremiseCredential = Get-Credential
-				New-MoveRequest -Identity $UserPrincipalName -Remote -RemoteHostName webmail.landair.com -TargetDeliveryDomain “LandairTransportInc.mail.onmicrosoft.com” -RemoteCredential $OnPremiseCredential
+				New-MoveRequest -Identity $UserPrincipalName -Remote -RemoteHostName webmail.landair.com -TargetDeliveryDomain "LandairTransportInc.mail.onmicrosoft.com" -RemoteCredential $OnPremiseCredential
 
 				$LyncServer = Read-Host "Enter the FQDN of the Lync server:"
 				$LyncCredential = Get-Credential
