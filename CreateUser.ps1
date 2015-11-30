@@ -53,6 +53,9 @@ foreach($User in $Users) {
 				Log -logFile $logFile -message “Setting SMTP addresses..”
 				Set-Mailbox -Identity $UserPrincipalName -EmailAddresses @{Remove=“SMTP:$UserPrincipalName”,Add=“smtp:$UserPrincipalName”,Add=“SMTP=$PrimarySMTPAddress”}
 
+				Log -logFile $logFile -message “Syncing Active Directory to Office 365..”
+				Start-OnlineCoexistenceSync -FullSync
+
 				Log -logFile $logFile -message “Connecting to Office 365..”
 				$Office365Credential = Get-Credential
 				$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $Office365Credential -Authentication Basic -AllowRedirection
