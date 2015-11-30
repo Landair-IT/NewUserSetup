@@ -53,12 +53,12 @@ foreach($User in $Users) {
 				Set-Mailbox -Identity $UserPrincipalName -EmailAddresses @{Remove=“SMTP:$UserPrincipalName”,Add=“smtp:$UserPrincipalName”,Add=“SMTP=$PrimarySMTPAddress”}
 
 				Log -logFile $logFile -message “Connecting to Office 365..”
-				$UserCredential = Get-Credential -Message “Enter in Office 365 credentials”
+				$UserCredential = Get-Credential
 				$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $UserCredential -Authentication Basic -AllowRedirection
 				Import-PSSession $Session
 
 				Log -logFile $logFile -message “Migrating mailbox to Office 365..”
-				$RemoteCredential = Get-Credential -Message “Enter in on-premise Exchange credentials”
+				$RemoteCredential = Get-Credential
 				New-MoveRequest -Identity $UserPrincipalName -Remote -RemoteHostName webmail.landair.com -TargetDeliveryDomain “LandairTransportInc.mail.onmicrosoft.com” -RemoteCredential $RemoteCredential
 				
 			}
